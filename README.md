@@ -1,14 +1,13 @@
-# template
-This repository is a template for new repositories of the Spine framework.
+# New repository template
+This repository serves as a template for new repositories of the Spine framework.
 
 Please see the [config][config-repo] repository
 for shared configurations and scripts. `config` is added to this repository as a Git submodule.
 
 ## Applying to new sub-project
                               
-### 1. Replace `template` with your project name
-Search for `template` throughout the Gradle code and replace it with the name of 
-your sub-project.
+### 1. Replace `"template"` with your project name
+Search for `template` throughout the code and replace it with the name of your sub-project.
 
 ### 2. Review the project structure  
 
