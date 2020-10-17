@@ -24,19 +24,22 @@ the `-server` module so that the build produces the server-side artifact.
 All it all, the structure of a new project highly depends on its goal, so 
 feel free to change [settings.gradle.kts](settings.gradle.kts) file according to your needs.
 
-### 3. Update `.travis.yml` file
+### 3. Rename `.travis._yml` to `.travis.yml`
+The template repository goes with the rename file to avoid unnecessary Travis builds.   
 
-#### 3.1 Encrypted variable values
+### 4. Update `.travis.yml` file
+
+#### 4.1 Encrypted variable values
   * Create encrypted value for the `GCS_SECRET` variable and put it under `env/global` section
     in the file.
-  * Create encrypted value for the `GITHUB_TOKEN` variable and put it under `env/gloval` section
+  * Create encrypted value for the `GITHUB_TOKEN` variable and put it under `env/global` section
     in the file.
  
 For detailed instructions please see:   
  * [Defining encrypted variables in .travis.yml][def-var-travis]
  * [Encryption keys / Usage][encryption-keys-travis] 
 
-#### 3.2 Update keys for `credentials.tar`
+#### 4.2 Update keys for `credentials.tar`
 Please follow [this procedure][encrypt-credentials] and update the line which starts from 
 `openssl aes-256-cbc` accordingly.
 
