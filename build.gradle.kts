@@ -47,11 +47,11 @@ buildscript {
 }
 
 plugins {
-    java
+    `java-library`
     idea
     id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
     id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
-    id("io.spine.tools.gradle.bootstrap") version "1.6.0" apply false
+    id("io.spine.tools.gradle.bootstrap") version "1.6.16" apply false
 }
 
 apply(from = "version.gradle.kts")
@@ -115,14 +115,14 @@ subprojects {
         errorproneJavac(Deps.build.errorProneJavac)
 
         implementation(Deps.build.guava)
-        implementation(Deps.build.jsr305Annotations)
-        implementation(Deps.build.checkerAnnotations)
-        Deps.build.errorProneAnnotations.forEach { implementation(it) }
+        compileOnlyApi(Deps.build.jsr305Annotations)
+        compileOnlyApi(Deps.build.checkerAnnotations)
+        Deps.build.errorProneAnnotations.forEach { compileOnlyApi(it) }
 
         testImplementation(Deps.test.guavaTestlib)
         Deps.test.junit5Api.forEach { testImplementation(it) }
-        testImplementation(Deps.test.junit5Runner)
         testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
+        testRuntimeOnly(Deps.test.junit5Runner)
     }
 
     DependencyResolution.forceConfiguration(configurations)
@@ -132,7 +132,7 @@ subprojects {
                 force(
                         "io.spine:spine-base:$spineBaseVersion",
                         "io.spine:spine-testlib:$spineBaseVersion",
-                        "io.spine:spine-base:$spineCoreVersion",
+                        "io.spine:spine-base:$spineBaseVersion",
                         "io.spine:spine-time:$spineTimeVersion"
                 )
             }
