@@ -62,6 +62,24 @@ all modules and does not describe the project structure per-subproject.
     <scope>test</scope>
   </dependency>
   <dependency>
+    <groupId>com.google.truth</groupId>
+    <artifactId>truth</artifactId>
+    <version>1.1</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.google.truth.extensions</groupId>
+    <artifactId>truth-java8-extension</artifactId>
+    <version>1.1</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.google.truth.extensions</groupId>
+    <artifactId>truth-proto-extension</artifactId>
+    <version>1.1</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
     <groupId>io.spine</groupId>
     <artifactId>spine-testlib</artifactId>
     <version>1.6.16</version>
