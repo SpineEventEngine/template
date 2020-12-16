@@ -57,7 +57,7 @@ plugins {
     idea
     id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
     id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
-    id("io.spine.tools.gradle.bootstrap") version "1.6.16" apply false
+    id("io.spine.tools.gradle.bootstrap") version "1.7.0" apply false
 }
 
 apply(from = "version.gradle.kts")
