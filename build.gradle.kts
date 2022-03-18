@@ -61,7 +61,7 @@ buildscript {
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
 
-
+    io.spine.internal.gradle.doApplyStandard(repositories)
 }
 
 plugins {
@@ -88,6 +88,8 @@ allprojects {
 
     group = "io.spine.template"
     version = extra["versionToPublish"]!!
+
+    repositories.applyStandard()
 }
 
 spinePublishing {
@@ -106,18 +108,14 @@ subprojects {
         plugin("kotlin")
         plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
-        plugin("pmd")
         plugin("maven-publish")
         plugin("io.spine.tools.gradle.bootstrap")
-    }
-
-    // Apply custom Kotlin script plugins.
-    apply {
+        plugin("jacoco")
+        plugin("pmd")
         plugin("pmd-settings")
     }
 
     CheckStyleConfig.applyTo(project)
-    JavadocConfig.applyTo(project)
     LicenseReporter.generateReportIn(project)
 
     tasks.withType<JavaCompile> {
@@ -149,10 +147,6 @@ subprojects {
             jvmTarget = javaVersion.toString()
             freeCompilerArgs = listOf("-Xskip-prerelease-check")
         }
-    }
-
-    repositories {
-        applyStandard()
     }
 
     dependencies {
@@ -194,6 +188,7 @@ subprojects {
     }
 }
 
-JacocoConfig.applyTo(project)
-PomGenerator.applyTo(project)
-LicenseReporter.mergeAllReports(project)
+// TODO: Apply after adding at least one Java subpropject.
+// JavadocConfig.applyTo(project)
+// PomGenerator.applyTo(project)
+// LicenseReporter.mergeAllReports(project)
