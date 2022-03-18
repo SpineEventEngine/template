@@ -58,10 +58,13 @@ import io.spine.internal.gradle.forceVersions
 buildscript {
     apply(from = "version.gradle.kts")
 
-    val spineBaseVersion: String by extra
-    val spineTimeVersion: String by extra
+    val mcJavaVersion: String by extra
 
     io.spine.internal.gradle.doApplyStandard(repositories)
+
+    dependencies {
+        classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
+    }
 }
 
 plugins {
@@ -70,7 +73,6 @@ plugins {
     idea
     id("com.google.protobuf")
     id("net.ltgt.errorprone")
-    id("io.spine.tools.gradle.bootstrap") version "1.7.0" apply false
 }
 
 apply(from = "version.gradle.kts")
@@ -107,9 +109,11 @@ subprojects {
         plugin("java-library")
         plugin("kotlin")
         plugin("com.google.protobuf")
-        plugin("net.ltgt.errorprone")
+
+        plugin("io.spine.mc-java")
+
         plugin("maven-publish")
-        plugin("io.spine.tools.gradle.bootstrap")
+        plugin("net.ltgt.errorprone")
         plugin("jacoco")
         plugin("pmd")
         plugin("pmd-settings")
