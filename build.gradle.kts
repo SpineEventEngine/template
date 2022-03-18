@@ -26,34 +26,25 @@
 
 @file:Suppress("RemoveRedundantQualifierName") // To prevent IDEA replacing FQN imports.
 
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
 import io.spine.internal.dependency.CheckerFramework
 import io.spine.internal.dependency.ErrorProne
 import io.spine.internal.dependency.Flogger
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.JavaX
-import io.spine.internal.dependency.Protobuf
-import io.spine.internal.gradle.javadoc.JavadocConfig
+import io.spine.internal.gradle.IncrementGuard
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
-import io.spine.internal.gradle.github.pages.updateGitHubPages
 import io.spine.internal.gradle.javac.configureErrorProne
 import io.spine.internal.gradle.javac.configureJavac
 import io.spine.internal.gradle.kotlin.applyJvmToolchain
 import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
-import io.spine.internal.gradle.report.coverage.JacocoConfig
 import io.spine.internal.gradle.report.license.LicenseReporter
-import io.spine.internal.gradle.report.pom.PomGenerator
-import io.spine.internal.gradle.testing.registerTestTasks
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import io.spine.internal.gradle.excludeProtobufLite
-import io.spine.internal.gradle.forceVersions
 
 buildscript {
     apply(from = "version.gradle.kts")
@@ -117,6 +108,8 @@ subprojects {
         plugin("jacoco")
         plugin("pmd")
         plugin("pmd-settings")
+
+        plugin<IncrementGuard>()
     }
 
     CheckStyleConfig.applyTo(project)
@@ -173,10 +166,10 @@ subprojects {
         all {
             resolutionStrategy {
                 force(
-                        "io.spine:spine-base:$spineBaseVersion",
-                        "io.spine:spine-testlib:$spineBaseVersion",
-                        "io.spine:spine-base:$spineBaseVersion",
-                        "io.spine:spine-time:$spineTimeVersion"
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine:spine-testlib:$spineBaseVersion",
+                    "io.spine:spine-base:$spineBaseVersion",
+                    "io.spine:spine-time:$spineTimeVersion"
                 )
             }
         }
