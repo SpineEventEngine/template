@@ -25,8 +25,3 @@
  */
 
 rootProject.name = "spine-template"
-
-include(
-        "template-client",
-        "template-server"
-)
