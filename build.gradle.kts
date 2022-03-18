@@ -26,37 +26,50 @@
 
 @file:Suppress("RemoveRedundantQualifierName") // To prevent IDEA replacing FQN imports.
 
-import io.spine.gradle.internal.DependencyResolution
-import io.spine.gradle.internal.Deps
-import io.spine.gradle.internal.PublishingRepos
+import com.google.protobuf.gradle.protobuf
+import com.google.protobuf.gradle.protoc
+import io.spine.internal.dependency.CheckerFramework
+import io.spine.internal.dependency.ErrorProne
+import io.spine.internal.dependency.Flogger
+import io.spine.internal.dependency.Guava
+import io.spine.internal.dependency.JUnit
+import io.spine.internal.dependency.JavaX
+import io.spine.internal.dependency.Protobuf
+import io.spine.internal.gradle.javadoc.JavadocConfig
+import io.spine.internal.gradle.applyStandard
+import io.spine.internal.gradle.checkstyle.CheckStyleConfig
+import io.spine.internal.gradle.excludeProtobufLite
+import io.spine.internal.gradle.forceVersions
+import io.spine.internal.gradle.github.pages.updateGitHubPages
+import io.spine.internal.gradle.javac.configureErrorProne
+import io.spine.internal.gradle.javac.configureJavac
+import io.spine.internal.gradle.kotlin.applyJvmToolchain
+import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
+import io.spine.internal.gradle.publish.PublishingRepos
+import io.spine.internal.gradle.publish.spinePublishing
+import io.spine.internal.gradle.report.coverage.JacocoConfig
+import io.spine.internal.gradle.report.license.LicenseReporter
+import io.spine.internal.gradle.report.pom.PomGenerator
+import io.spine.internal.gradle.testing.registerTestTasks
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import io.spine.internal.gradle.excludeProtobufLite
+import io.spine.internal.gradle.forceVersions
 
 buildscript {
     apply(from = "version.gradle.kts")
-    apply(from = "$rootDir/config/gradle/dependencies.gradle")
-
-    val dependencyResolution = io.spine.gradle.internal.DependencyResolution
 
     val spineBaseVersion: String by extra
     val spineTimeVersion: String by extra
 
-    dependencyResolution.defaultRepositories(repositories)
-    dependencyResolution.forceConfiguration(configurations)
 
-    configurations.all {
-        resolutionStrategy {
-            force(
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
-            )
-        }
-    }
 }
 
 plugins {
     `java-library`
+    kotlin("jvm")
     idea
-    id("com.google.protobuf").version(io.spine.gradle.internal.Deps.versions.protobufPlugin)
-    id("net.ltgt.errorprone").version(io.spine.gradle.internal.Deps.versions.errorPronePlugin)
+    id("com.google.protobuf")
+    id("net.ltgt.errorprone")
     id("io.spine.tools.gradle.bootstrap") version "1.7.0" apply false
 }
 
@@ -64,12 +77,6 @@ apply(from = "version.gradle.kts")
 val spineCoreVersion: String by extra
 val spineBaseVersion: String by extra
 val spineTimeVersion: String by extra
-
-extra["projectsToPublish"] = listOf(
-        "template-client",
-        "template-server"
-)
-extra["credentialsPropertyFile"] = PublishingRepos.cloudRepo.credentials
 
 allprojects {
     apply {
@@ -83,57 +90,87 @@ allprojects {
     version = extra["versionToPublish"]!!
 }
 
+spinePublishing {
+    with(PublishingRepos) {
+        targetRepositories.addAll(
+            cloudRepo,
+            cloudArtifactRegistry
+        )
+    }
+    projectsToPublish.addAll(subprojects.map { it.path })
+}
+
 subprojects {
     apply {
         plugin("java-library")
+        plugin("kotlin")
+        plugin("com.google.protobuf")
         plugin("net.ltgt.errorprone")
         plugin("pmd")
+        plugin("maven-publish")
         plugin("io.spine.tools.gradle.bootstrap")
-
-        from(Deps.scripts.javacArgs(project))
-        from(Deps.scripts.pmd(project))
-        from(Deps.scripts.projectLicenseReport(project))
-        from(Deps.scripts.testOutput(project))
-        from(Deps.scripts.javadocOptions(project))
-
-        from(Deps.scripts.testArtifacts(project))
     }
 
-    val isTravis = System.getenv("TRAVIS") == "true"
-    if (isTravis) {
-        tasks.javadoc {
-            val opt = options
-            if (opt is CoreJavadocOptions) {
-                opt.addStringOption("Xmaxwarns", "1")
-            }
+    // Apply custom Kotlin script plugins.
+    apply {
+        plugin("pmd-settings")
+    }
+
+    CheckStyleConfig.applyTo(project)
+    JavadocConfig.applyTo(project)
+    LicenseReporter.generateReportIn(project)
+
+    tasks.withType<JavaCompile> {
+        configureJavac()
+    }
+
+    val javaVersion = 11
+    kotlin {
+        applyJvmToolchain(javaVersion)
+        explicitApi()
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+        setFreeCompilerArgs()
+    }
+
+    tasks.withType<JavaCompile> {
+        configureJavac()
+        configureErrorProne()
+    }
+
+    kotlin {
+        explicitApi()
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = javaVersion.toString()
+            freeCompilerArgs = listOf("-Xskip-prerelease-check")
         }
     }
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+    repositories {
+        applyStandard()
     }
-
-    DependencyResolution.defaultRepositories(repositories)
 
     dependencies {
-        errorprone(Deps.build.errorProneCore)
-        errorproneJavac(Deps.build.errorProneJavac)
+        errorprone(ErrorProne.core)
 
-        implementation(Deps.build.guava)
-        compileOnlyApi(Deps.build.jsr305Annotations)
-        compileOnlyApi(Deps.build.checkerAnnotations)
-        Deps.build.errorProneAnnotations.forEach { compileOnlyApi(it) }
+        compileOnlyApi(CheckerFramework.annotations)
+        compileOnlyApi(JavaX.annotations)
+        ErrorProne.annotations.forEach { compileOnlyApi(it) }
 
-        testImplementation(Deps.test.guavaTestlib)
-        Deps.test.junit5Api.forEach { testImplementation(it) }
-        Deps.test.truth.forEach { testImplementation(it) }
-        testImplementation("io.spine.tools:spine-mute-logging:$spineBaseVersion")
+        testImplementation(Guava.testLib)
+        testImplementation(JUnit.runner)
+        testImplementation(JUnit.pioneer)
+        JUnit.api.forEach { testImplementation(it) }
 
-        testRuntimeOnly(Deps.test.junit5Runner)
+        runtimeOnly(Flogger.Runtime.systemBackend)
+        runtimeOnly(Flogger.Runtime.systemBackend)
     }
 
-    DependencyResolution.forceConfiguration(configurations)
     configurations {
         all {
             resolutionStrategy {
@@ -146,47 +183,17 @@ subprojects {
             }
         }
     }
-    DependencyResolution.excludeProtobufLite(configurations)
+
+    configurations.forceVersions()
+    configurations.excludeProtobufLite()
 
     tasks.test {
         useJUnitPlatform {
             includeEngines("junit-jupiter")
         }
     }
-
-    apply {
-        from(Deps.scripts.slowTests(project))
-        from(Deps.scripts.testOutput(project))
-        from(Deps.scripts.javadocOptions(project))
-    }
-
-    tasks.register("sourceJar", Jar::class) {
-        from(sourceSets.main.get().allJava)
-        archiveClassifier.set("sources")
-    }
-
-    tasks.register("testOutputJar", Jar::class) {
-        from(sourceSets.test.get().output)
-        archiveClassifier.set("test")
-    }
-
-    tasks.register("javadocJar", Jar::class) {
-        from("$projectDir/build/docs/javadoc")
-        archiveClassifier.set("javadoc")
-
-        dependsOn(tasks.javadoc)
-    }
 }
 
-apply {
-    from(Deps.scripts.publish(project))
-
-    // Aggregated coverage report across all subprojects.
-    from(Deps.scripts.jacoco(project))
-
-    // Generate a repository-wide report of 3rd-party dependencies and their licenses.
-    from(Deps.scripts.repoLicenseReport(project))
-
-    // Generate a `pom.xml` file containing first-level dependency of all projects in the repository.
-    from(Deps.scripts.generatePom(project))
-}
+JacocoConfig.applyTo(project)
+PomGenerator.applyTo(project)
+LicenseReporter.mergeAllReports(project)
