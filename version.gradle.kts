@@ -24,9 +24,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-project.extra.apply {
-    this["versionToPublish"] = "0.0.1"
-    this["spineCoreVersion"] = "1.7.0"
-    this["spineBaseVersion"] = "1.7.0"
-    this["spineTimeVersion"] = "1.7.0"
-}
+val spineBaseVersion: String by extra("2.0.0-SNAPSHOT.77")
+val mcJavaVersion: String by extra("2.0.0-SNAPSHOT.83")
+val spineCoreVersion: String by extra("2.0.0-SNAPSHOT.91")
+val versionToPublish: String by extra(spineCoreVersion)

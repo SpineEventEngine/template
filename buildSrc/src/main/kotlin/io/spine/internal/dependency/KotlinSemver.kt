@@ -24,4 +24,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-spine.enableJava().client()
+package io.spine.internal.dependency
+
+// https://github.com/z4kn4fein/kotlin-semver
+@Suppress("unused")
+object KotlinSemver {
+    private const val version = "1.2.1"
+    const val lib     = "io.github.z4kn4fein:semver:$version"
+}
