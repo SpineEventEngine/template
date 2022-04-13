@@ -32,7 +32,7 @@ import io.spine.internal.dependency.Flogger
 import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.JavaX
-import io.spine.internal.gradle.IncrementGuard
+import io.spine.internal.gradle.publish.IncrementGuard
 import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
@@ -86,13 +86,11 @@ allprojects {
 }
 
 spinePublishing {
-    with(PublishingRepos) {
-        targetRepositories.addAll(
-            cloudRepo,
-            cloudArtifactRegistry
-        )
-    }
-    projectsToPublish.addAll(subprojects.map { it.path })
+    modules = subprojects.map { it.path }.toSet()
+    destinations = setOf(
+        PublishingRepos.cloudRepo,
+        PublishingRepos.cloudArtifactRegistry
+    )
 }
 
 subprojects {
