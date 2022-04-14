@@ -115,6 +115,7 @@ private fun ResolutionStrategy.forceTransitiveDependencies() {
     force(
         AutoValue.annotations,
         Gson.lib,
+        JUnit.bom,
         J2ObjC.annotations,
         Plexus.utils,
         Okio.lib,

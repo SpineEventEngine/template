@@ -39,11 +39,13 @@ import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
 import io.spine.internal.gradle.javac.configureErrorProne
 import io.spine.internal.gradle.javac.configureJavac
+import io.spine.internal.gradle.javadoc.JavadocConfig
 import io.spine.internal.gradle.kotlin.applyJvmToolchain
 import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.license.LicenseReporter
+import io.spine.internal.gradle.report.pom.PomGenerator
 import io.spine.internal.gradle.testing.registerTestTasks
 import io.spine.internal.gradle.testing.configureLogging
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -106,11 +108,14 @@ subprojects {
         plugin<IncrementGuard>()
     }
 
+    val spineBaseVersion: String by extra
+
     dependencies {
         errorprone(ErrorProne.core)
 
         compileOnlyApi(CheckerFramework.annotations)
         compileOnlyApi(JavaX.annotations)
+        api("io.spine:spine-base:$spineBaseVersion")
         ErrorProne.annotations.forEach { compileOnlyApi(it) }
 
         testImplementation(Guava.testLib)
@@ -126,21 +131,13 @@ subprojects {
         forceVersions()
         excludeProtobufLite()
 
-        // TODO: Force `spine-base` when the version conflict occurs.
-
-        // Usually, a version of `spine-base` is dictated by `java-core`.
-        // When `java-core` and a specific version of `spine-base` are needed,
-        // the version conflict may occur.
-
-//        val spineBaseVersion: String by extra
-//        all {
-//            resolutionStrategy {
-//                force(
-//                    "io.spine:spine-base:$spineBaseVersion",
-//                    "io.spine:spine-testlib:$spineBaseVersion",
-//                )
-//            }
-//        }
+        all {
+            resolutionStrategy {
+                force(
+                    "io.spine:spine-base:$spineBaseVersion",
+                )
+            }
+        }
     }
 
     java {
@@ -176,7 +173,6 @@ subprojects {
     LicenseReporter.generateReportIn(project)
 }
 
-// TODO: Apply after adding at least one Java subproject.
-// JavadocConfig.applyTo(project)
-// PomGenerator.applyTo(project)
-// LicenseReporter.mergeAllReports(project)
+JavadocConfig.applyTo(project)
+PomGenerator.applyTo(project)
+LicenseReporter.mergeAllReports(project)

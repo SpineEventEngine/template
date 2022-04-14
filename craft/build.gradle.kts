@@ -24,9 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO: Rename the root project and add subprojects.
-rootProject.name = "spine-template"
+plugins {
+    application
+}
 
-include(
-    "craft"
-)
+application {
+    mainClass.set("io.spine.craft.App")
+}

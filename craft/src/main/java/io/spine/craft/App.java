@@ -24,9 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO: Rename the root project and add subprojects.
-rootProject.name = "spine-template"
+package io.spine.craft;
 
-include(
-    "craft"
-)
+public class App {
+
+    private App() {
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Choosing a crafter");
+        var crafter = new Crafter();
+
+        System.out.println("Crafting a table");
+        var table = crafter.table();
+
+        System.out.println("Result: " + table.getUuid());
+    }
+}

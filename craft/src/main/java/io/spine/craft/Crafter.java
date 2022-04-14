@@ -24,9 +24,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO: Rename the root project and add subprojects.
-rootProject.name = "spine-template"
+package io.spine.craft;
 
-include(
-    "craft"
-)
+import io.spine.table.Leg;
+import io.spine.table.Table;
+import io.spine.table.Tabletop;
+
+import java.util.List;
+import java.util.UUID;
+
+public class Crafter {
+
+    public Table table() {
+        var tabletop = tabletop();
+        var legs = List.of(
+                leg(),
+                leg(),
+                leg(),
+                leg()
+        );
+
+        var table = Table.newBuilder()
+                .setUuid(randomUUID())
+                .addAllLegs(legs)
+                .setTabletop(tabletop)
+                .vBuild();
+
+        return table;
+    }
+
+    public Leg leg() {
+        return Leg.newBuilder().vBuild();
+    }
+
+    public Tabletop tabletop() {
+        return Tabletop.newBuilder().vBuild();
+    }
+
+    private static String randomUUID() {
+        var result = UUID.randomUUID().toString();
+        return result;
+    }
+
+}
