@@ -44,14 +44,15 @@ import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.license.LicenseReporter
+import io.spine.internal.gradle.testing.registerTestTasks
+import io.spine.internal.gradle.testing.configureLogging
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    apply(from = "version.gradle.kts")
-
-    val mcJavaVersion: String by extra
-
     io.spine.internal.gradle.doApplyStandard(repositories)
+
+    apply(from = "version.gradle.kts")
+    val mcJavaVersion: String by extra
 
     dependencies {
         classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
@@ -66,17 +67,12 @@ plugins {
     id("net.ltgt.errorprone")
 }
 
-apply(from = "version.gradle.kts")
-val spineCoreVersion: String by extra
-val spineBaseVersion: String by extra
-val spineTimeVersion: String by extra
-
 allprojects {
     apply {
         plugin("jacoco")
         plugin("idea")
         plugin("project-report")
-        apply(from = "$rootDir/version.gradle.kts")
+        from("$rootDir/version.gradle.kts")
     }
 
     group = "io.spine.template"
@@ -110,40 +106,6 @@ subprojects {
         plugin<IncrementGuard>()
     }
 
-    CheckStyleConfig.applyTo(project)
-    LicenseReporter.generateReportIn(project)
-
-    tasks.withType<JavaCompile> {
-        configureJavac()
-    }
-
-    val javaVersion = 11
-    kotlin {
-        applyJvmToolchain(javaVersion)
-        explicitApi()
-    }
-
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
-        setFreeCompilerArgs()
-    }
-
-    tasks.withType<JavaCompile> {
-        configureJavac()
-        configureErrorProne()
-    }
-
-    kotlin {
-        explicitApi()
-    }
-
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = javaVersion.toString()
-            freeCompilerArgs = listOf("-Xskip-prerelease-check")
-        }
-    }
-
     dependencies {
         errorprone(ErrorProne.core)
 
@@ -161,6 +123,12 @@ subprojects {
     }
 
     configurations {
+        forceVersions()
+        excludeProtobufLite()
+
+        val spineBaseVersion: String by extra
+        val spineTimeVersion: String by extra
+
         all {
             resolutionStrategy {
                 force(
@@ -173,17 +141,40 @@ subprojects {
         }
     }
 
-    configurations.forceVersions()
-    configurations.excludeProtobufLite()
-
-    tasks.test {
-        useJUnitPlatform {
-            includeEngines("junit-jupiter")
+    java {
+        tasks.withType<JavaCompile>().configureEach {
+            configureErrorProne()
+            configureJavac()
         }
     }
+
+    kotlin {
+        val javaVersion = JavaVersion.VERSION_11.toString()
+
+        applyJvmToolchain(javaVersion)
+        explicitApi()
+
+        tasks.withType<KotlinCompile>().configureEach {
+            kotlinOptions.jvmTarget = javaVersion
+            setFreeCompilerArgs()
+        }
+    }
+
+    tasks {
+        registerTestTasks()
+        test {
+            configureLogging()
+            useJUnitPlatform {
+                includeEngines("junit-jupiter")
+            }
+        }
+    }
+
+    CheckStyleConfig.applyTo(project)
+    LicenseReporter.generateReportIn(project)
 }
 
-// TODO: Apply after adding at least one Java subpropject.
+// TODO: Apply after adding at least one Java subproject.
 // JavadocConfig.applyTo(project)
 // PomGenerator.applyTo(project)
 // LicenseReporter.mergeAllReports(project)
