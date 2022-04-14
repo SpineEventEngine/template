@@ -133,9 +133,7 @@ subprojects {
 
         all {
             resolutionStrategy {
-                force(
-                    "io.spine:spine-base:$spineBaseVersion",
-                )
+                force("io.spine:spine-base:$spineBaseVersion",)
             }
         }
     }
