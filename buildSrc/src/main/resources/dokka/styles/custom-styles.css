@@ -24,22 +24,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.internal.gradle.java.publish
+:root,
+:root.theme-dark {
+    --color-dark: #007bff;
+}
 
-import org.gradle.api.Task
-import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.TaskProvider
+.library-name a::before {
+    background-image: url('https://spine.io/img/spine-sign-white.svg')
+}
 
-/**
- * Locates `publish` task in this [TaskContainer].
- *
- * This task publishes all defined publications to all defined repositories. To achieve that,
- * the task depends on all `publish`*PubName*`PublicationTo`*RepoName*`Repository` tasks.
- *
- * Please note, task execution would not copy publications to the local Maven cache.
- *
- * @see <a href="https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:tasks">
- *     Tasks | Maven Publish Plugin</a>
- */
-internal val TaskContainer.publish: TaskProvider<Task>
-    get() = named("publish")
+.cover a,
+.main-subrow.keyValue a {
+    font-family: monospace;
+}
+
+:root.theme-dark dt {
+    color: #fff;
+}
