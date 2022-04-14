@@ -127,15 +127,12 @@ subprojects {
         excludeProtobufLite()
 
         val spineBaseVersion: String by extra
-        val spineTimeVersion: String by extra
 
         all {
             resolutionStrategy {
                 force(
                     "io.spine:spine-base:$spineBaseVersion",
                     "io.spine:spine-testlib:$spineBaseVersion",
-                    "io.spine:spine-base:$spineBaseVersion",
-                    "io.spine:spine-time:$spineTimeVersion"
                 )
             }
         }
