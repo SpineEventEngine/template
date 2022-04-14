@@ -25,9 +25,9 @@
  */
 syntax = "proto3";
 
-package spine.table;
+package spine.craft;
 
-option java_package = "io.spine.table";
+option java_package = "io.spine.craft";
 option java_outer_classname = "TableProto";
 option java_multiple_files = true;
 

@@ -26,10 +26,6 @@
 
 package io.spine.craft;
 
-import io.spine.table.Leg;
-import io.spine.table.Table;
-import io.spine.table.Tabletop;
-
 import java.util.List;
 import java.util.UUID;
 
