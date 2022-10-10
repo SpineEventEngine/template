@@ -24,45 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.tools.ant.taskdefs.condition.Os
+package io.spine.internal.gradle.dokka
 
-println("`build-tasks.gradle` script is deprecated. " +
-        "Please use `DartTasks.build()` extension instead.")
+import java.io.File
+import org.gradle.api.file.FileCollection
+import org.jetbrains.dokka.gradle.GradleDokkaSourceSetBuilder
 
-final def GROUP = 'Dart'
-final def packageIndex = "$projectDir/.packages" as File
-final def extension = Os.isFamily(Os.FAMILY_WINDOWS) ? '.bat' : ''
-final def PUB_EXECUTABLE = 'pub' + extension
-
-task resolveDependencies(type: Exec) {
-    group = GROUP
-    description = 'Fetches the dependencies declared via `pubspec.yaml`.'
-
-    inputs.file "$projectDir/pubspec.yaml"
-    outputs.file packageIndex
-
-    commandLine PUB_EXECUTABLE, 'get'
-
-    mustRunAfter 'cleanPackageIndex'
+/**
+ * Returns only Java source roots out of all present in the source set.
+ *
+ * It is a helper method for generating documentation by Dokka only for Java code.
+ * It is helpful when both Java and Kotlin source files are present in a source set.
+ * Dokka can properly generate documentation for either Kotlin or Java depending on
+ * the configuration, but not both.
+ */
+internal fun GradleDokkaSourceSetBuilder.onlyJavaSources(): FileCollection {
+    return sourceRoots.filter(File::isJavaSourceDirectory)
 }
 
-tasks['assemble'].dependsOn 'resolveDependencies'
-
-task cleanPackageIndex(type: Delete) {
-    group = GROUP
-    description = 'Deletes the `.packages` file on this Dart module.'
-    delete = [packageIndex]
+private fun File.isJavaSourceDirectory(): Boolean {
+    return isDirectory && name == "java"
 }
-
-tasks['clean'].dependsOn 'cleanPackageIndex'
-
-task testDart(type: Exec) {
-    group = GROUP
-    description = 'Runs Dart tests declared in the `./test` directory. See `https://pub.dev/packages/test#running-tests`.'
-
-    commandLine PUB_EXECUTABLE, 'run', 'test'
-
-    dependsOn 'resolveDependencies'
-}
-
-tasks['check'].dependsOn 'testDart'

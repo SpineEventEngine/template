@@ -24,39 +24,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * This plugin configured the test output as follows:
+package io.spine.internal.gradle.git
+
+/**
+ * Contains information about a Git user.
  *
- *  - the standard streams of the tests execution are logged;
- *  - exceptions thrown in tests are logged;
- *  - after all the tests are executed, a short test summary is logged; the summary shown the number
- *    of tests and their results.
+ * Determines the author and committer fields of a commit.
+ *
+ * @constructor throws an [IllegalArgumentException] if the name or the email
+ *              is an empty string.
  */
-
-println("`test-output.gradle` script is deprecated. Please use `Test.configureLogging()` instead.")
-
-tasks.withType(Test).each {
-    it.testLogging {
-        showStandardStreams = true
-        showExceptions = true
-        showStackTraces = true
-        showCauses = true
-        exceptionFormat = 'full'
-    }
-
-    it.afterSuite { final testDescriptor, final result ->
-        // If the descriptor has no parent, then it is the root test suite, i.e. it includes the
-        // info about all the run tests.
-        if (!testDescriptor.parent) {
-            logger.lifecycle(
-                    """
-                    Test summary:
-                    >> ${result.testCount} tests
-                    >> ${result.successfulTestCount} succeeded
-                    >> ${result.failedTestCount} failed
-                    >> ${result.skippedTestCount} skipped
-                    """
-            )
-        }
+data class UserInfo(val name: String, val email: String) {
+    init {
+        require(name.isNotBlank()) { "Name cannot be an empty string." }
+        require(email.isNotBlank()) { "Email cannot be an empty string." }
     }
 }

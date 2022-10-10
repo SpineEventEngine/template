@@ -24,22 +24,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Apply this script if it is needed to use test classes of the current project in other projects.
-// The dependency looks like this:
-//
-// testCompile project(path: ":projectWithTests", configuration: 'testArtifacts')
-//
+package io.spine.internal.gradle.dokka
 
-println("`test-artifacts.gradle` script is deprecated. " +
-        "Please use the `Project.exposeTestArtifacts()` utility instead.")
+import org.gradle.api.tasks.TaskContainer
+import org.jetbrains.dokka.gradle.DokkaTask
 
-configurations {
-    testArtifacts.extendsFrom testRuntime
-}
-task testJar(type: Jar) {
-    classifier "test"
-    from sourceSets.test.output
-}
-artifacts {
-    testArtifacts testJar
-}
+/**
+ * Finds the `dokkaHtml` Gradle task.
+ */
+fun TaskContainer.dokkaHtmlTask() = this.getByName("dokkaHtml") as DokkaTask
