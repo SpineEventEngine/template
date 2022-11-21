@@ -98,6 +98,7 @@ subprojects {
         plugin("jacoco")
         plugin("pmd")
         plugin("pmd-settings")
+        plugin("detekt-code-analysis")
 
         plugin<IncrementGuard>()
     }
