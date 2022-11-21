@@ -128,12 +128,12 @@ subprojects {
         // When `java-core` and a specific version of `spine-base` are needed,
         // the version conflict may occur.
 
-//        val spineBaseVersion: String by extra
+//        val spine = Spine(project)
 //        all {
 //            resolutionStrategy {
 //                force(
-//                    "io.spine:spine-base:$spineBaseVersion",
-//                    "io.spine:spine-testlib:$spineBaseVersion",
+//                    spine.base,
+//                    spine.testlib
 //                )
 //            }
 //        }
