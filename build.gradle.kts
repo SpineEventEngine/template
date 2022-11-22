@@ -33,7 +33,6 @@ import io.spine.internal.dependency.Guava
 import io.spine.internal.dependency.JUnit
 import io.spine.internal.dependency.JavaX
 import io.spine.internal.gradle.publish.IncrementGuard
-import io.spine.internal.gradle.applyStandard
 import io.spine.internal.gradle.checkstyle.CheckStyleConfig
 import io.spine.internal.gradle.excludeProtobufLite
 import io.spine.internal.gradle.forceVersions
@@ -44,27 +43,25 @@ import io.spine.internal.gradle.kotlin.setFreeCompilerArgs
 import io.spine.internal.gradle.publish.PublishingRepos
 import io.spine.internal.gradle.publish.spinePublishing
 import io.spine.internal.gradle.report.license.LicenseReporter
+import io.spine.internal.gradle.standardToSpineSdk
 import io.spine.internal.gradle.testing.registerTestTasks
 import io.spine.internal.gradle.testing.configureLogging
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
-    io.spine.internal.gradle.doApplyStandard(repositories)
-
-    apply(from = "version.gradle.kts")
-    val mcJavaVersion: String by extra
-
+    standardSpineSdkRepositories()
     dependencies {
-        classpath("io.spine.tools:spine-mc-java:$mcJavaVersion")
+        classpath(io.spine.internal.dependency.Spine.McJava.pluginLib)
     }
 }
 
 plugins {
     `java-library`
     kotlin("jvm")
+    protobuf
+    errorprone
+    `gradle-doctor`
     idea
-    id("com.google.protobuf")
-    id("net.ltgt.errorprone")
 }
 
 allprojects {
@@ -78,7 +75,7 @@ allprojects {
     group = "io.spine.template"
     version = extra["versionToPublish"]!!
 
-    repositories.applyStandard()
+    repositories.standardToSpineSdk()
 }
 
 spinePublishing {
@@ -102,6 +99,7 @@ subprojects {
         plugin("jacoco")
         plugin("pmd")
         plugin("pmd-settings")
+        plugin("detekt-code-analysis")
 
         plugin<IncrementGuard>()
     }
@@ -132,12 +130,12 @@ subprojects {
         // When `java-core` and a specific version of `spine-base` are needed,
         // the version conflict may occur.
 
-//        val spineBaseVersion: String by extra
+//        val spine = Spine(project)
 //        all {
 //            resolutionStrategy {
 //                force(
-//                    "io.spine:spine-base:$spineBaseVersion",
-//                    "io.spine:spine-testlib:$spineBaseVersion",
+//                    spine.base,
+//                    spine.testlib
 //                )
 //            }
 //        }
@@ -164,11 +162,9 @@ subprojects {
 
     tasks {
         registerTestTasks()
-        test {
+        withType<Test>().configureEach {
             configureLogging()
-            useJUnitPlatform {
-                includeEngines("junit-jupiter")
-            }
+            useJUnitPlatform()
         }
     }
 
